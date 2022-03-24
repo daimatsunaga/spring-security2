@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -7,16 +8,28 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.example.demo.util.Role;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Autowired
+	private final UserDetailsService userDetailsService;
+	
+	public SecurityConfig(UserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
+	}
+	
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+    	//パスワードの暗号化用に、BCrypt（ビー・クリプト）を使用します
         return new BCryptPasswordEncoder();
     }
 
@@ -24,14 +37,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         // セキュリティ設定を、無視（ignoring）するパスを指定します
         // 通常、cssやjs、imgなどの静的リソースを指定します
-        web.ignoring().antMatchers("/css/**", "/img/**", "/webjars/**");
+        web.ignoring().antMatchers("/js/**", "/css/**", "/img/**", "/webjars/**");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                // 「/login」と「/error」をアクセス可能にします
-                .antMatchers("/login", "/error").permitAll()
+                // 「/login」と「/register」をアクセス可能にします
+                .antMatchers("/login", "/register").permitAll()
+                //「/admin」はADMINユーザだけアクセス可能
+                .antMatchers("/admin/**").hasRole(Role.ADMIN.name())
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -52,17 +67,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth)
-            throws Exception {
-        auth.inMemoryAuthentication()
-            // ユーザ名「admin」と「user」を用意します
-            // パスワードは両方とも「password」です
-            .withUser("admin")
-                .password(passwordEncoder().encode("password"))
-                .authorities("ROLE_ADMIN")
-                .and()
-            .withUser("user")
-                .password(passwordEncoder().encode("password"))
-                .authorities("ROLE_USER");
-    }
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    	// userDetailsServiceを使用して、DBからユーザを参照可能にする
+        auth.userDetailsService(userDetailsService)
+        .passwordEncoder(passwordEncoder());
+;    }
 }
