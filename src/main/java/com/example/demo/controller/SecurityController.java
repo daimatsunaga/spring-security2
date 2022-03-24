@@ -17,8 +17,6 @@ public class SecurityController {
     public String showList(Authentication loginUser, Model model) {
         model.addAttribute("username", loginUser.getName());
         model.addAttribute("role", loginUser.getAuthorities());
-        
-        System.out.println(loginUser);
         return "user";
     }
 }
