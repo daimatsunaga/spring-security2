@@ -15,7 +15,11 @@ import javax.validation.Payload;
 @Constraint(validatedBy = UniqueLoginValidator.class)
 //@UniqueLoginというアノテーションが使えるようになる
 public @interface UniqueLogin {
+	//以下3つ要素は全て必要
     String message() default "このユーザ名は既に登録されています";
+    //特定のバリデーショングループがカスタマイズできるような設定です。
+    //空の Class<?> 型で初期化されている必要があります。
     Class<?>[] groups() default{};
+    //チェック対象のオブジェクトになんらかのメタ情報を与えるためだけの宣言
     Class<? extends Payload>[] payload() default{};
 }
