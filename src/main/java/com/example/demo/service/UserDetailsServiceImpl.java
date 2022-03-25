@@ -38,7 +38,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     	//追加した順に取得できるとは限らない
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
         grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
-
+        //Spring Securityで認証できる形というのは、Spring Securityで用意されているUserクラスもしくはそれを継承したクラスである
         return new User(user.getUsername(), user.getPassword(), grantedAuthorities);
     }
 }

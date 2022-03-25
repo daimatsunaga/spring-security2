@@ -46,6 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login", "/register").permitAll()
                 //「/admin」はADMINユーザだけアクセス可能
                 .antMatchers("/admin/**").hasRole(Role.ADMIN.name())
+                //それ以外は用認証
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -69,6 +70,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     	// userDetailsServiceを使用して、DBからユーザを参照可能にする
         auth.userDetailsService(userDetailsService)
+        // 取得したパスワードがbcryptでハッシュ化されていたため、
+        // ログイン画面で入力されたパスワードをbcryptでハッシュ化して照合を行う
         .passwordEncoder(passwordEncoder());
 ;    }
 }

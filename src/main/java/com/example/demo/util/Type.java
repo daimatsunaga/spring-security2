@@ -14,7 +14,7 @@ public class Type {
 		genders.put(1, "男性");
 		genders.put(2, "女性");
 		genders.put(3, "その他");
-		
+		//変更不可能なMapを返す
 		GENDERS = Collections.unmodifiableMap(genders);
 		
 	}
