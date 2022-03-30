@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.demo.model.SiteUser;
@@ -63,6 +64,20 @@ class SecurityControllerTest {
 			.andExpect(redirectedUrl("/login?register"))
 			//ステータスコードがFound(302)であることを検証(Foundは302を確認するメソッド)
 			.andExpect(status().isFound());
+	}
+	
+	@Test
+	@DisplayName("管理者ユーザでログイン時、ユーザ一覧を表示することを期待")
+	//モックユーザーでログインする springsecurityのテストで一番簡単（引数を取らないで行うことも可能）
+	@WithMockUser(username="admin", roles = "ADMIN")
+	void whenLoggedInAsAdminUser_expectToSeeListOfUsers() throws Exception {
+		mockMvc
+			.perform(get("/admin/list"))
+			//ステータスコード200であることを検証
+			.andExpect(status().isOk())
+			//HTMLの表示内容に、指定した文字列を含んでいるか検証
+			.andExpect(content().string(containsString("ユーザ一覧")))
+			.andExpect(view().name("list"));
 	}
 
 }
